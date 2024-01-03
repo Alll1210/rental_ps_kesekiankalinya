@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _RegisterState extends State<Register> {
   }
 
   save() async {
-    final response = await http.post(Uri.parse("http://192.168.124.136/ps/API/register.php"), body: {
+    final response = await http.post(Uri.parse(BaseUrl.register), body: {
       "nama": nama,
       "username": username,
       "password": password

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 import 'dashboard.dart';
 import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,11 +21,12 @@ class _LoginState extends State<Login> {
 
   String username = '';
   String password = '';
+  String nama = ''; // Tambahkan variabel untuk nama lengkap
   final _key = GlobalKey<FormState>();
+  bool _secureText = true; // Perbaiki nilai awal _secureText menjadi true
+  bool _isLoading = false;
 
-  bool _secureText = false;
-
-  showHide() {
+  void showHide() {
     setState(() {
       _secureText = !_secureText;
     });
@@ -38,52 +40,97 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void login() async {
-    final Uri uri = Uri.parse("http://192.168.124.136/ps/API/login.php");
-    final response = await http.post(uri, body: {
-      "username": username,
-      "password": password,
+  Future<void> login() async {
+    setState(() {
+      _isLoading = true;
     });
+
+    final Uri uri = Uri.parse(BaseUrl.login);
+
+    try {
+      final response = await http.post(uri, body: {
+        "username": username,
+        "password": password,
+      });
+
+      if (response.statusCode == 200) {
+        handleLoginResponse(response);
+      } else {
+        print("Error: ${response.statusCode}");
+        showErrorMessage("Failed to connect to the server");
+      }
+    } catch (error) {
+      print("Error: $error");
+      showErrorMessage("An unexpected error occurred");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void handleLoginResponse(http.Response response) {
     final data = jsonDecode(response.body);
-    int? value = data['value'] as int?; // Menggunakan tipe data nullable (int?)
+    int? value = data['value'] as int?;
     String pesan = data['message'];
-    String usernameAPI = data['username'] ?? ''; // Menggunakan nilai default jika null
-    String namaAPI = data['nama'] ?? ''; // Menggunakan nilai default jika null
+    String usernameAPI = data['username'] ?? '';
+    String namaAPI = data['nama'] ?? '';
 
     if (value == 1) {
-      setState(() {
-        _loginStatus = LoginStatus.signIn;
-        savePref(value ?? 0, usernameAPI, namaAPI);
-      });
-      print(pesan);
+      savePref(value ?? 0, usernameAPI, namaAPI);
+      showSuccessMessage("Login successful");
     } else {
-      print(pesan);
+      print("Login failed: $pesan");
+      showErrorMessage("Login failed: $pesan");
     }
-    print(data);
   }
 
-
-  savePref(int value, String username, String nama) async {
+  void savePref(int value, String username, String nama) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("value", value);
-    preferences.setString("nama", nama);
+    preferences.setString("nama", nama); // Simpan nama lengkap
     preferences.setString("username", username);
+
+    setState(() {
+      _loginStatus = LoginStatus.signIn;
+      // Set nilai variabel nama
+      this.nama = nama;
+    });
   }
 
-  signOut() async {
+  void signOut() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.remove("value");
+
     setState(() {
       _loginStatus = LoginStatus.notSignIn;
     });
   }
 
+  void showErrorMessage(String message) {
+    // Implement your error message display logic here
+    print("Error: $message");
+  }
+
+  void showSuccessMessage(String message) {
+    // Implement your success message display logic here
+    print(message);
+  }
+
   var value;
-  getPref() async {
+
+  void getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       value = preferences.getInt("value");
-      _loginStatus = value == 1 ? LoginStatus.signIn : LoginStatus.notSignIn;
+      if (value == 1) {
+        username = preferences.getString("username") ?? '';
+        // Add this line
+        nama = preferences.getString("nama") ?? '';
+        _loginStatus = LoginStatus.signIn;
+      } else {
+        _loginStatus = LoginStatus.notSignIn;
+      }
     });
   }
 
@@ -97,71 +144,73 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     switch (_loginStatus) {
       case LoginStatus.notSignIn:
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Login"),
-          ),
-          body: Form(
-            key: _key,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Masukkan Username";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) =>
-                    username = value ?? '',
-                    decoration: InputDecoration(
-                      labelText: "Username",
-                    ),
-                  ),
-                  TextFormField(
-                    obscureText: _secureText,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Masukkan Password";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) =>
-                    password = value ?? '',
-                    decoration: InputDecoration(
-                        labelText: "Password",
-                        suffixIcon: IconButton(
-                          onPressed: showHide,
-                          icon: Icon(
-                              _secureText ? Icons.visibility_off : Icons.visibility),
-                        )
-                    ),
-                  ),
-                  SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      check();
-                    },
-                    child: Text("Login"),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => Register()));
-                    },
-                    child: Text("Daftar Akun", textAlign: TextAlign.center,),
-                  )
-                ],
-              ),
-            ),
-          ),
-        );
+        return buildLoginForm();
         break;
       case LoginStatus.signIn:
         return Dashboard(signOut: signOut);
         break;
     }
+  }
+
+  Widget buildLoginForm() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Login"),
+      ),
+      body: Form(
+        key: _key,
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Masukkan Username";
+                  }
+                  return null;
+                },
+                onSaved: (value) => username = value ?? '',
+                decoration: InputDecoration(
+                  labelText: "Username",
+                ),
+              ),
+              TextFormField(
+                obscureText: _secureText,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Masukkan Password";
+                  }
+                  return null;
+                },
+                onSaved: (value) => password = value ?? '',
+                decoration: InputDecoration(
+                    labelText: "Password",
+                    suffixIcon: IconButton(
+                      onPressed: showHide,
+                      icon: Icon(
+                          _secureText ? Icons.visibility_off : Icons.visibility),
+                    )
+                ),
+              ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _isLoading ? null : check,
+                child: _isLoading
+                    ? CircularProgressIndicator()
+                    : Text("Login"),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => Register()));
+                },
+                child: Text("Daftar Akun", textAlign: TextAlign.center,),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
