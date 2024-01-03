@@ -21,9 +21,10 @@ class _LoginState extends State<Login> {
 
   String username = '';
   String password = '';
-  String nama = ''; // Tambahkan variabel untuk nama lengkap
+  String nama = '';
+  String id = '';
   final _key = GlobalKey<FormState>();
-  bool _secureText = true; // Perbaiki nilai awal _secureText menjadi true
+  bool _secureText = true;
   bool _isLoading = false;
 
   void showHide() {
@@ -75,9 +76,10 @@ class _LoginState extends State<Login> {
     String pesan = data['message'];
     String usernameAPI = data['username'] ?? '';
     String namaAPI = data['nama'] ?? '';
+    String id = data['id'] ?? '';
 
     if (value == 1) {
-      savePref(value ?? 0, usernameAPI, namaAPI);
+      savePref(value ?? 0, usernameAPI, namaAPI, id);
       showSuccessMessage("Login successful");
     } else {
       print("Login failed: $pesan");
@@ -85,11 +87,12 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void savePref(int value, String username, String nama) async {
+  void savePref(int value, String nama, String username, String id) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("value", value);
-    preferences.setString("nama", nama); // Simpan nama lengkap
+    preferences.setString("nama", nama);
     preferences.setString("username", username);
+    preferences.setString("id", id);
 
     setState(() {
       _loginStatus = LoginStatus.signIn;
