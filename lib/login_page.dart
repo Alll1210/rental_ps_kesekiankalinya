@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dashboard.dart';
+import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
@@ -18,8 +19,8 @@ class _LoginState extends State<Login> {
   LoginStatus _loginStatus = LoginStatus.notSignIn;
 
   String username = '';
-  String password = ''; // Mengatasi nullable String
-  final _key = new GlobalKey<FormState>();
+  String password = '';
+  final _key = GlobalKey<FormState>();
 
   bool _secureText = false;
 
@@ -44,12 +45,15 @@ class _LoginState extends State<Login> {
       "password": password,
     });
     final data = jsonDecode(response.body);
-    int value = data['value'];
+    int? value = data['value'] as int?; // Menggunakan tipe data nullable (int?)
     String pesan = data['message'];
+    String usernameAPI = data['username'] ?? ''; // Menggunakan nilai default jika null
+    String namaAPI = data['nama'] ?? ''; // Menggunakan nilai default jika null
+
     if (value == 1) {
       setState(() {
         _loginStatus = LoginStatus.signIn;
-        savePref(value);
+        savePref(value ?? 0, usernameAPI, namaAPI);
       });
       print(pesan);
     } else {
@@ -58,27 +62,33 @@ class _LoginState extends State<Login> {
     print(data);
   }
 
-  savePref(int value)async{
+
+  savePref(int value, String username, String nama) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("value", value);
+    preferences.setString("nama", nama);
+    preferences.setString("username", username);
+  }
+
+  signOut() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.remove("value");
     setState(() {
-      preferences.setInt("value", value);
-      preferences.commit();
+      _loginStatus = LoginStatus.notSignIn;
     });
   }
 
   var value;
-  getPref()async{
+  getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       value = preferences.getInt("value");
-
-      _loginStatus = value == 1 ?  LoginStatus.signIn : LoginStatus.notSignIn;
+      _loginStatus = value == 1 ? LoginStatus.signIn : LoginStatus.notSignIn;
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getPref();
   }
@@ -105,7 +115,7 @@ class _LoginState extends State<Login> {
                       return null;
                     },
                     onSaved: (value) =>
-                    username = value ?? '', // Mengatasi nullable String
+                    username = value ?? '',
                     decoration: InputDecoration(
                       labelText: "Username",
                     ),
@@ -119,7 +129,7 @@ class _LoginState extends State<Login> {
                       return null;
                     },
                     onSaved: (value) =>
-                    password = value ?? '', // Mengatasi nullable String
+                    password = value ?? '',
                     decoration: InputDecoration(
                         labelText: "Password",
                         suffixIcon: IconButton(
@@ -136,6 +146,13 @@ class _LoginState extends State<Login> {
                     },
                     child: Text("Login"),
                   ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => Register()));
+                    },
+                    child: Text("Daftar Akun", textAlign: TextAlign.center,),
+                  )
                 ],
               ),
             ),
@@ -143,7 +160,7 @@ class _LoginState extends State<Login> {
         );
         break;
       case LoginStatus.signIn:
-        return Dashboard(); // Menggunakan Dashboard setelah login
+        return Dashboard(signOut: signOut);
         break;
     }
   }
