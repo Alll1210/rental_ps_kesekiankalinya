@@ -52,6 +52,66 @@ class _PlaystationsState extends State<Playstations> {
     });
   }
 
+  void dialogDelete(String idBilik) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: ListView(
+            padding: EdgeInsets.all(16.0),
+            shrinkWrap: true,
+            children: <Widget>[
+              Text("Hapus Data PS?",
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+              SizedBox(
+                height: 10.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                      child: Text("Batal")),
+                  SizedBox(
+                    width: 16.0,
+                  ),
+                  InkWell(
+                    onTap: (){
+                      _delete(idBilik);
+                    },
+                      child: Text("Hapus"))
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _delete(String idBilik) async {
+    final response = await http.post(
+      Uri.parse(BaseUrl.deletePlaystations),
+      body: {
+        "id_bilik": idBilik,
+      },
+    );
+
+    final data = jsonDecode(response.body);
+    int value = data['value'];
+    String pesan = data['message'];
+    if (value == 1) {
+      setState(() {
+        Navigator.pop(context);
+        _lihatData();
+      });
+    } else {
+      print(pesan);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -104,7 +164,7 @@ class _PlaystationsState extends State<Playstations> {
                   ),
                   IconButton(
                     onPressed: () {
-
+                      dialogDelete(x.idBilik);
                     },
                     icon: Icon(Icons.delete),
                   ),
