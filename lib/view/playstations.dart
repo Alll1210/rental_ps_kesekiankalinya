@@ -15,8 +15,9 @@ class Playstations extends StatefulWidget {
 class _PlaystationsState extends State<Playstations> {
   var loading = false;
   final list = <psModel>[];
+  final GlobalKey<RefreshIndicatorState> _refresh = GlobalKey<RefreshIndicatorState>();
 
-  _lihatData() async {
+  Future<void> _lihatData() async {
     list.clear();
     setState(() {
       loading = true;
@@ -63,44 +64,52 @@ class _PlaystationsState extends State<Playstations> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddPlaystations()),
+            MaterialPageRoute(builder: (context) => AddPlaystations(_lihatData)),
           );
         },
       ),
       body: loading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-        itemCount: list.length,
-        itemBuilder: (context, i) {
-          final x = list[i];
-          return Container(
-            padding: EdgeInsets.all(10.0),
-            key: Key(x.idBilik.toString()),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(x.jenisPs, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
-                      Text(x.daftarGame),
-                      Text(x.harga),
-                      Text(x.nama),
-                    ],
+          : RefreshIndicator(
+        onRefresh: _lihatData,
+        key: _refresh,
+        child: ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context, i) {
+            final x = list[i];
+            return Container(
+              padding: EdgeInsets.all(10.0),
+              key: Key(x.idBilik.toString()),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(x.jenisPs, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                        Text(x.daftarGame),
+                        Text(x.harga),
+                        Text(x.nama),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                    onPressed: (){},
-                icon: Icon(Icons.edit),
-                ),
-                IconButton(
-                  onPressed: (){},
-                  icon: Icon(Icons.delete),
-                ),
-              ],
-            ),
-          );
-        },
+                  IconButton(
+                    onPressed: () {
+                      // Tambahkan fungsi edit di sini
+                    },
+                    icon: Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      // Tambahkan fungsi delete di sini
+                    },
+                    icon: Icon(Icons.delete),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

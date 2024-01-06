@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 
 class AddPlaystations extends StatefulWidget {
-  const AddPlaystations({Key? key}) : super(key: key);
+  final VoidCallback reload;
+  AddPlaystations(this.reload, {Key? key}) : super(key: key);
 
   @override
   State<AddPlaystations> createState() => _AddPlaystationsState();
@@ -15,48 +16,53 @@ class _AddPlaystationsState extends State<AddPlaystations> {
   String? jenisPs, daftarGame, harga, idUsers;
   final _key = GlobalKey<FormState>();
 
-  getPref() async {
+  // Gunakan async/await di dalam metode initState
+  @override
+  void initState() {
+    super.initState();
+    getPref();
+  }
+
+  Future<void> getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       idUsers = preferences.getString("id");
     });
   }
 
-  check() {
+  void check() {
     final form = _key.currentState;
     if (form != null && form.validate()) {
       form.save();
       submit();
     }
   }
+
   Future<void> submit() async {
     final form = _key.currentState;
     if (form != null && form.validate()) {
       form.save();
-  final response = await http.post(Uri.parse(BaseUrl.addPlaystations), body: {
-  "jenis_ps": jenisPs!,
-  "daftar_game": daftarGame!,
-  "harga": harga!,
-    "idUsers" :idUsers
-  },
-  );
-  final data = jsonDecode(response.body);
-  int value = data['value'];
-  String pesan = data['message'];
-  if (value == 1) {
-  print(pesan);
-  setState(() {
-  Navigator.pop(context);
-  });
-  } else {
-  print(pesan);
-  }
-}
-}
-  @override
-  void initState() {
-    super.initState();
-    getPref();
+      final response = await http.post(Uri.parse(BaseUrl.addPlaystations), body: {
+        "jenis_ps": jenisPs!,
+        "daftar_game": daftarGame!,
+        "harga": harga!,
+        "idUsers": idUsers!,
+      });
+
+      final data = jsonDecode(response.body);
+      int value = data['value'];
+      String pesan = data['message'];
+
+      if (value == 1) {
+        print(pesan);
+        setState(() {
+          widget.reload();
+          Navigator.pop(context);
+        });
+      } else {
+        print(pesan);
+      }
+    }
   }
 
   @override
