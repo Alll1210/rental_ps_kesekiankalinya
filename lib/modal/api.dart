@@ -3,4 +3,5 @@ class BaseUrl {
   static String register = "http://192.168.124.136/ps/API/register.php";
   static String addPlaystations = "http://192.168.124.136/ps/API/add_playstations.php";
   static String getPlaystations = "http://192.168.124.136/ps/API/get_playstations.php";
+  static String editPlaystations = "http://192.168.124.136/ps/API/edit_playstations.php";
 }

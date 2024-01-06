@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 import 'package:rental_ps_kesekiankalinya/modal/psModel.dart';
+import 'package:rental_ps_kesekiankalinya/view/edit_playstations.dart';
 import 'add_playstations.dart';
 
 class Playstations extends StatefulWidget {
@@ -95,13 +96,15 @@ class _PlaystationsState extends State<Playstations> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // Tambahkan fungsi edit di sini
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context)=>EditPlaystations(x, _lihatData)
+                      ));
                     },
                     icon: Icon(Icons.edit),
                   ),
                   IconButton(
                     onPressed: () {
-                      // Tambahkan fungsi delete di sini
+
                     },
                     icon: Icon(Icons.delete),
                   ),
