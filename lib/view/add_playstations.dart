@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rental_ps_kesekiankalinya/custom/currency.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
-
+import 'package:image_picker/image_picker.dart';
+import 'package:async/async.dart';
+import 'package:path/path.dart' as path;
 
 class AddPlaystations extends StatefulWidget {
   final VoidCallback reload;
@@ -18,8 +21,8 @@ class AddPlaystations extends StatefulWidget {
 class _AddPlaystationsState extends State<AddPlaystations> {
   String? jenisPs, daftarGame, harga, idUsers;
   final _key = GlobalKey<FormState>();
+  File? _imageFile;
 
-  // Gunakan async/await di dalam metode initState
   @override
   void initState() {
     super.initState();
@@ -33,6 +36,32 @@ class _AddPlaystationsState extends State<AddPlaystations> {
     });
   }
 
+  _pilihGallery() async {
+    var image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxHeight: 1920.0,
+      maxWidth: 1080.0,
+    );
+    if (image != null) {
+      setState(() {
+        _imageFile = File(image.path);
+      });
+    }
+  }
+
+  _pilihKamera() async {
+    var image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxHeight: 1920.0,
+      maxWidth: 1080.0,
+    );
+    if (image != null) {
+      setState(() {
+        _imageFile = File(image.path);
+      });
+    }
+  }
+
   void check() {
     final form = _key.currentState;
     if (form != null && form.validate()) {
@@ -42,34 +71,42 @@ class _AddPlaystationsState extends State<AddPlaystations> {
   }
 
   Future<void> submit() async {
-    final form = _key.currentState;
-    if (form != null && form.validate()) {
-      form.save();
-      final response = await http.post(Uri.parse(BaseUrl.addPlaystations), body: {
-        "jenis_ps": jenisPs!,
-        "daftar_game": daftarGame!,
-        "harga": harga!.replaceAll(",", ""),
-        "idUsers": idUsers!,
-      });
+    try {
+      var stream = http.ByteStream(DelegatingStream.typed(_imageFile!.openRead()));
+      var length = await _imageFile!.length();
+      var uri = Uri.parse(BaseUrl.addPlaystations);
+      var request = http.MultipartRequest("POST", uri);
+      request.fields['jenis_ps'] = jenisPs!;
+      request.fields['daftar_game'] = daftarGame!;
+      request.fields['harga'] = harga!.replaceAll(",", "");
+      request.fields['idUsers'] = idUsers!;
 
-      final data = jsonDecode(response.body);
-      int value = data['value'];
-      String pesan = data['message'];
-
-      if (value == 1) {
-        print(pesan);
+      request.files.add(http.MultipartFile.fromBytes(
+        'gambar',
+        await _imageFile!.readAsBytes(),
+        filename: path.basename(_imageFile!.path),
+      ));
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        print("Gambar ditambahkan");
         setState(() {
-          widget.reload();
           Navigator.pop(context);
         });
       } else {
-        print(pesan);
+        print("Gagal menambah gambar");
       }
+    } catch (e) {
+      debugPrint("Error $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var placeholder = Container(
+      width: double.infinity,
+      height: 150.0,
+      child: Image.asset('assets/placeholder.png'), // Ensure correct asset path
+    );
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -79,6 +116,21 @@ class _AddPlaystationsState extends State<AddPlaystations> {
           child: ListView(
             padding: EdgeInsets.all(16.0),
             children: <Widget>[
+              Container(
+                width: double.infinity,
+                height: 150.0,
+                child: InkWell(
+                  onTap: () {
+                    _pilihGallery();
+                  },
+                  child: _imageFile == null
+                      ? placeholder
+                      : Image.file(
+                    _imageFile!,
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
               TextFormField(
                 onSaved: (e) => jenisPs = e,
                 decoration: InputDecoration(labelText: 'Jenis PS'),

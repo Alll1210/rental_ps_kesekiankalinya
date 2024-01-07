@@ -40,6 +40,7 @@ class _PlaystationsState extends State<Playstations> {
             api["harga"],
             api["idUsers"],
             api["nama"],
+            api["gambar"],
           );
           list.add(ab);
         });
@@ -145,7 +146,15 @@ class _PlaystationsState extends State<Playstations> {
               padding: EdgeInsets.all(10.0),
               key: Key(x.idBilik.toString()),
               child: Row(
-                children: [
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Image.network(
+                    'http://192.168.124.136/ps/upload/'+x.gambar,
+                    width: 100.0, height: 180.0,
+                  fit: BoxFit.cover,),
+                  SizedBox(
+                    width: 15.0,
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
