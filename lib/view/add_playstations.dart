@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:rental_ps_kesekiankalinya/custom/currency.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rental_ps_kesekiankalinya/modal/api.dart';
+import 'package:flutter/services.dart' show FilteringTextInputFormatter;
+
 
 class AddPlaystations extends StatefulWidget {
   final VoidCallback reload;
@@ -45,7 +48,7 @@ class _AddPlaystationsState extends State<AddPlaystations> {
       final response = await http.post(Uri.parse(BaseUrl.addPlaystations), body: {
         "jenis_ps": jenisPs!,
         "daftar_game": daftarGame!,
-        "harga": harga!,
+        "harga": harga!.replaceAll(",", ""),
         "idUsers": idUsers!,
       });
 
@@ -85,6 +88,10 @@ class _AddPlaystationsState extends State<AddPlaystations> {
                 decoration: InputDecoration(labelText: 'Daftar Game'),
               ),
               TextFormField(
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyFormat(),
+                ],
                 onSaved: (e) => harga = e,
                 decoration: InputDecoration(labelText: 'Harga Per Jam'),
               ),

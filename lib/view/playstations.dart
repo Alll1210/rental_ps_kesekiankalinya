@@ -5,6 +5,7 @@ import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 import 'package:rental_ps_kesekiankalinya/modal/psModel.dart';
 import 'package:rental_ps_kesekiankalinya/view/edit_playstations.dart';
 import 'add_playstations.dart';
+import 'package:intl/intl.dart';
 
 class Playstations extends StatefulWidget {
   const Playstations({Key? key}) : super(key: key);
@@ -14,6 +15,8 @@ class Playstations extends StatefulWidget {
 }
 
 class _PlaystationsState extends State<Playstations> {
+  final money = NumberFormat("#,##0","en_US");
+
   var loading = false;
   final list = <psModel>[];
   final GlobalKey<RefreshIndicatorState> _refresh = GlobalKey<RefreshIndicatorState>();
@@ -149,7 +152,7 @@ class _PlaystationsState extends State<Playstations> {
                       children: <Widget>[
                         Text(x.jenisPs, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
                         Text(x.daftarGame),
-                        Text(x.harga),
+                        Text(money.format(int.parse(x.harga))),
                         Text(x.nama),
                       ],
                     ),
