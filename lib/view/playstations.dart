@@ -106,15 +106,27 @@ class _PlaystationsState extends State<Playstations> {
     final data = jsonDecode(response.body);
     int value = data['value'];
     String pesan = data['message'];
+
     if (value == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Data berhasil dihapus!'),
+        ),
+      );
+
       setState(() {
         Navigator.pop(context);
         _lihatData();
       });
     } else {
-      print(pesan);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus data: $pesan'),
+        ),
+      );
     }
   }
+
 
   @override
   void initState() {
@@ -132,6 +144,7 @@ class _PlaystationsState extends State<Playstations> {
             MaterialPageRoute(builder: (context) => AddPlaystations(_lihatData)),
           );
         },
+        child: Icon(Icons.add), // Ganti ikon dengan icon tambahan ('+')
       ),
       body: loading
           ? Center(child: CircularProgressIndicator())
@@ -149,8 +162,8 @@ class _PlaystationsState extends State<Playstations> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Image.network(
-                    'http://192.168.124.136/ps/upload/'+x.gambar,
-                    width: 100.0, height: 180.0,
+                    'http://192.168.150.48/ps/upload/'+x.gambar,
+                    width: 100.0, height: 100.0,
                   fit: BoxFit.cover,),
                   SizedBox(
                     width: 15.0,

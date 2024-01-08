@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:async/async.dart';
 import 'package:path/path.dart' as path;
 
+
 class AddPlaystations extends StatefulWidget {
   final VoidCallback reload;
   AddPlaystations(this.reload, {Key? key}) : super(key: key);
@@ -89,6 +90,11 @@ class _AddPlaystationsState extends State<AddPlaystations> {
       var response = await request.send();
       if (response.statusCode == 200) {
         print("Gambar ditambahkan");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Data berhasil ditambahkan'),
+          ),
+        );
         setState(() {
           Navigator.pop(context);
         });
@@ -118,7 +124,7 @@ class _AddPlaystationsState extends State<AddPlaystations> {
             children: <Widget>[
               Container(
                 width: double.infinity,
-                height: 150.0,
+                height: 200.0,
                 child: InkWell(
                   onTap: () {
                     _pilihGallery();
@@ -134,10 +140,22 @@ class _AddPlaystationsState extends State<AddPlaystations> {
               TextFormField(
                 onSaved: (e) => jenisPs = e,
                 decoration: InputDecoration(labelText: 'Jenis PS'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Harap isi Jenis PS';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 onSaved: (e) => daftarGame = e,
                 decoration: InputDecoration(labelText: 'Daftar Game'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Harap isi Daftar Game';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 inputFormatters: [
@@ -146,11 +164,20 @@ class _AddPlaystationsState extends State<AddPlaystations> {
                 ],
                 onSaved: (e) => harga = e,
                 decoration: InputDecoration(labelText: 'Harga Per Jam'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Harap isi Harga Per Jam';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () {
-                  check();
+                  if (_key.currentState!.validate()) {
+                    // Hanya submit jika formulir valid
+                    check();
+                  }
                 },
                 child: Text("Simpan"),
               ),

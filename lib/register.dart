@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rental_ps_kesekiankalinya/modal/api.dart';
 
@@ -9,7 +9,7 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  String? username, password, nama; // Tambahkan tanda "?" untuk mengatasi nullable String
+  String? username, password, nama;
   final _key = GlobalKey<FormState>();
 
   bool _secureText = false;
@@ -38,11 +38,22 @@ class _RegisterState extends State<Register> {
     int value = data['value'];
     String pesan = data['message'];
     if (value == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Pendaftaran berhasil!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
       setState(() {
         Navigator.pop(context);
       });
     } else {
-      print(pesan);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mendaftar. $pesan'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 

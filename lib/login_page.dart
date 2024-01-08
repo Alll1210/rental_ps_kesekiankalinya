@@ -80,10 +80,10 @@ class _LoginState extends State<Login> {
 
     if (value == 1) {
       savePref(value ?? 0, usernameAPI, namaAPI, id);
-      showSuccessMessage("Login successful");
+      showSuccessMessage("Login Berhasil");
     } else {
       print("Login failed: $pesan");
-      showErrorMessage("Login failed: $pesan");
+      showErrorMessage("Login Gagal: $pesan");
     }
   }
 
@@ -96,7 +96,6 @@ class _LoginState extends State<Login> {
 
     setState(() {
       _loginStatus = LoginStatus.signIn;
-      // Set nilai variabel nama
       this.nama = nama;
     });
   }
@@ -110,14 +109,23 @@ class _LoginState extends State<Login> {
     });
   }
 
+  void showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   void showErrorMessage(String message) {
-    // Implement your error message display logic here
     print("Error: $message");
+    showSnackbar("Error: $message");
   }
 
   void showSuccessMessage(String message) {
-    // Implement your success message display logic here
     print(message);
+    showSnackbar(message);
   }
 
   var value;
@@ -128,7 +136,6 @@ class _LoginState extends State<Login> {
       value = preferences.getInt("value");
       if (value == 1) {
         username = preferences.getString("username") ?? '';
-        // Add this line
         nama = preferences.getString("nama") ?? '';
         _loginStatus = LoginStatus.signIn;
       } else {
