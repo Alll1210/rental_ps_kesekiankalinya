@@ -7,8 +7,11 @@ class psModel{
   final String idUsers;
   final String nama;
   final String gambar;
+  final String status;
 
 
-  psModel(this.idPs, this.bilik, this.jenisPs, this.daftarGame, this.harga, this.idUsers, this.nama, this.gambar);
+
+  psModel(this.idPs, this.bilik, this.jenisPs, this.daftarGame, this.harga,
+      this.idUsers, this.nama, this.gambar, this.status);
 
 }

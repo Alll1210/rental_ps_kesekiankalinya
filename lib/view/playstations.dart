@@ -43,6 +43,7 @@ class _PlaystationsState extends State<Playstations> {
             api["idUsers"],
             api["nama"],
             api["gambar"],
+            api["status"],
           );
           list.add(ab);
         });
@@ -154,74 +155,87 @@ class _PlaystationsState extends State<Playstations> {
           : RefreshIndicator(
         onRefresh: _lihatData,
         key: _refresh,
-        child: ListView.builder(
-          itemCount: list.length,
-          itemBuilder: (context, i) {
-            final x = list[i];
-            return Container(
-              padding: EdgeInsets.all(10.0),
-              key: Key(x.idPs.toString()),
-              height: 150.0, // Atur tinggi Container
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    width: 100.0,
-                    height: 100.0,
-                    child: Image.network(
-                      'http://192.168.150.48/ps/upload/' + x.gambar,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(width: 15.0),
-                  Expanded(
-                    child: Column(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (context, i) {
+                  final x = list[i];
+                  return Container(
+                    padding: EdgeInsets.all(10.0),
+                    key: Key(x.idPs.toString()),
+                    height: 180.0,
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          'Bilik ${x.bilik}',
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                        Container(
+                          width: 90.0,
+                          height: 90.0,
+                          child: Image.network(
+                            'http://192.168.150.48/ps/upload/' + x.gambar,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        SizedBox(height: 5.0),
-                        Text(x.jenisPs),
-                        SizedBox(height: 5.0),
-                        Text(
-                          x.daftarGame.length > 20
-                              ? x.daftarGame.substring(0, 20) + "..."
-                              : x.daftarGame,
+                        SizedBox(width: 15.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Bilik ${x.bilik}',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 5.0),
+                              Text(x.jenisPs),
+                              SizedBox(height: 5.0),
+                              Text(
+                                x.daftarGame.length > 20
+                                    ? x.daftarGame.substring(0, 20) + "..."
+                                    : x.daftarGame,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                              SizedBox(height: 5.0),
+                              Text('Rp. ${money.format(int.parse(x.harga))}'),
+                              SizedBox(height: 5.0),
+                              Text('Status : ${x.status}'),
+                              SizedBox(height: 5.0),
+                              Text('Admin : ${x.nama}'),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: 5.0),
-                        Text('Rp. ${money.format(int.parse(x.harga))}'),
-                        SizedBox(height: 5.0),
-                        Text('Admin : ${x.nama}'),
+                        SizedBox(width: 15.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => EditPlaystations(x, _lihatData),
+                                ));
+                              },
+                              icon: Icon(Icons.edit),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                dialogDelete(x.idPs);
+                              },
+                              icon: Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(width: 15.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  EditPlaystations(x, _lihatData)));
-                        },
-                        icon: Icon(Icons.edit),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          dialogDelete(x.idPs);
-                        },
-                        icon: Icon(Icons.delete),
-                      ),
-                    ],
-                  ),
-                ],
+
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

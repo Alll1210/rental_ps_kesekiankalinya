@@ -20,7 +20,7 @@ class AddPlaystations extends StatefulWidget {
 }
 
 class _AddPlaystationsState extends State<AddPlaystations> {
-  String? bilik, jenisPs, daftarGame, harga, idUsers;
+  String? bilik, jenisPs, daftarGame, harga, idUsers, status;
   final _key = GlobalKey<FormState>();
   File? _imageFile;
 
@@ -82,6 +82,7 @@ class _AddPlaystationsState extends State<AddPlaystations> {
       request.fields['daftar_game'] = daftarGame!;
       request.fields['harga'] = harga!.replaceAll(".", "");
       request.fields['idUsers'] = idUsers!;
+      request.fields['status'] = status!;
 
       request.files.add(http.MultipartFile.fromBytes(
         'gambar',
@@ -112,7 +113,7 @@ class _AddPlaystationsState extends State<AddPlaystations> {
     var placeholder = Container(
       width: double.infinity,
       height: 150.0,
-      child: Image.asset('assets/placeholder.png'), // Ensure correct asset path
+      child: Image.asset('assets/placeholder.png'),
     );
     return Scaffold(
       appBar: AppBar(),
@@ -182,11 +183,14 @@ class _AddPlaystationsState extends State<AddPlaystations> {
                   return null;
                 },
               ),
+              TextFormField(
+                onSaved: (e) => status = e,
+                decoration: InputDecoration(labelText: 'Status'),
+              ),
               SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () {
                   if (_key.currentState!.validate()) {
-                    // Hanya submit jika formulir valid
                     check();
                   }
                 },

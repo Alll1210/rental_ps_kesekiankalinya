@@ -18,7 +18,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
   String username = "";
   String nama = "";
 
-  late TabController tabController; // Menggunakan late untuk inisialisasi nanti
+  late TabController tabController;
 
   Future<void> getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();

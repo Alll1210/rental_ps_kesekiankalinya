@@ -20,7 +20,13 @@ class EditPlaystations extends StatefulWidget {
 
 class _EditPlaystationsState extends State<EditPlaystations> {
   final _key = GlobalKey<FormState>();
-  String bilik = '', jenisPs = '', daftarGame = '', harga = '', idUser = '', id_ps = '';
+  String bilik = '';
+  String jenisPs = '';
+  String daftarGame = '';
+  String harga = '';
+  String idUser = '';
+  String id_ps = '';
+  String status = '';
   File? _imageFile;
 
   _pilihGallery() async {
@@ -40,6 +46,7 @@ class _EditPlaystationsState extends State<EditPlaystations> {
   TextEditingController txtJenis = TextEditingController();
   TextEditingController txtGame = TextEditingController();
   TextEditingController txtHarga = TextEditingController();
+  TextEditingController txtStatus = TextEditingController();
 
   @override
   void initState() {
@@ -57,6 +64,7 @@ class _EditPlaystationsState extends State<EditPlaystations> {
     txtJenis.text = widget.model.jenisPs ?? '';
     txtGame.text = widget.model.daftarGame ?? '';
     txtHarga.text = widget.model.harga ?? '';
+    txtStatus.text = widget.model.status ?? '';
   }
 
   void check() {
@@ -77,6 +85,7 @@ class _EditPlaystationsState extends State<EditPlaystations> {
       request.fields['daftar_game'] = daftarGame;
       request.fields['harga'] = harga.replaceAll(",", "");
       request.fields['id_ps'] = widget.model.idPs;
+      request.fields['status'] = status;
 
       if (_imageFile != null) {
         var stream = http.ByteStream(DelegatingStream.typed(_imageFile!.openRead()));
@@ -92,7 +101,7 @@ class _EditPlaystationsState extends State<EditPlaystations> {
       var responseData = await response.stream.toBytes();
       var responseString = utf8.decode(responseData);
 
-      print("Response String: $responseString");  // Tambahkan baris ini untuk melihat responseString di konsol
+      print("Response String: $responseString");
 
       final data = jsonDecode(responseString);
       int value = data['value'];
@@ -115,11 +124,10 @@ class _EditPlaystationsState extends State<EditPlaystations> {
         ));
       }
     } catch (e) {
-      print("Error: $e");  // Tambahkan baris ini untuk melihat pesan kesalahan di konsol
+      print("Error: $e");
       debugPrint("Error $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +171,11 @@ class _EditPlaystationsState extends State<EditPlaystations> {
               controller: txtHarga,
               onSaved: (e) => harga = e ?? '',
               decoration: InputDecoration(labelText: 'Harga Per Jam'),
+            ),
+            TextFormField(
+              controller: txtStatus,
+              onSaved: (e) => status = e ?? '',
+              decoration: InputDecoration(labelText: 'Status'),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(

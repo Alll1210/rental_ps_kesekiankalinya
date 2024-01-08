@@ -10,7 +10,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Delay 4 detik sebelum pindah ke halaman berikutnya
     Timer(Duration(seconds: 4), () {
       Navigator.pushReplacementNamed(context, '/login');
     });
