@@ -20,7 +20,7 @@ class AddPlaystations extends StatefulWidget {
 }
 
 class _AddPlaystationsState extends State<AddPlaystations> {
-  String? jenisPs, daftarGame, harga, idUsers;
+  String? bilik, jenisPs, daftarGame, harga, idUsers;
   final _key = GlobalKey<FormState>();
   File? _imageFile;
 
@@ -77,9 +77,10 @@ class _AddPlaystationsState extends State<AddPlaystations> {
       var length = await _imageFile!.length();
       var uri = Uri.parse(BaseUrl.addPlaystations);
       var request = http.MultipartRequest("POST", uri);
+      request.fields['bilik'] = bilik!;
       request.fields['jenis_ps'] = jenisPs!;
       request.fields['daftar_game'] = daftarGame!;
-      request.fields['harga'] = harga!.replaceAll(",", "");
+      request.fields['harga'] = harga!.replaceAll(".", "");
       request.fields['idUsers'] = idUsers!;
 
       request.files.add(http.MultipartFile.fromBytes(
@@ -136,6 +137,16 @@ class _AddPlaystationsState extends State<AddPlaystations> {
                     fit: BoxFit.fill,
                   ),
                 ),
+              ),
+              TextFormField(
+                onSaved: (e) => bilik = e,
+                decoration: InputDecoration(labelText: 'Bilik'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Harap isi Bilik';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 onSaved: (e) => jenisPs = e,

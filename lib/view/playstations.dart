@@ -15,11 +15,12 @@ class Playstations extends StatefulWidget {
 }
 
 class _PlaystationsState extends State<Playstations> {
-  final money = NumberFormat("#,##0","en_US");
+  final money = NumberFormat("#,##0", "en_US");
 
   var loading = false;
   final list = <psModel>[];
-  final GlobalKey<RefreshIndicatorState> _refresh = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refresh = GlobalKey<
+      RefreshIndicatorState>();
 
   Future<void> _lihatData() async {
     list.clear();
@@ -34,7 +35,8 @@ class _PlaystationsState extends State<Playstations> {
         final data = jsonDecode(response.body);
         data.forEach((api) {
           final ab = psModel(
-            api["id_bilik"],
+            api["id_ps"],
+            api["bilik"],
             api["jenis_ps"],
             api["daftar_game"],
             api["harga"],
@@ -56,7 +58,7 @@ class _PlaystationsState extends State<Playstations> {
     });
   }
 
-  void dialogDelete(String idBilik) {
+  void dialogDelete(String idPs) {
     showDialog(
       context: context,
       builder: (context) {
@@ -66,7 +68,7 @@ class _PlaystationsState extends State<Playstations> {
             shrinkWrap: true,
             children: <Widget>[
               Text("Hapus Data PS?",
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
               SizedBox(
                 height: 10.0,
               ),
@@ -74,17 +76,17 @@ class _PlaystationsState extends State<Playstations> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    },
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
                       child: Text("Batal")),
                   SizedBox(
                     width: 16.0,
                   ),
                   InkWell(
-                    onTap: (){
-                      _delete(idBilik);
-                    },
+                      onTap: () {
+                        _delete(idPs);
+                      },
                       child: Text("Hapus"))
                 ],
               )
@@ -95,11 +97,11 @@ class _PlaystationsState extends State<Playstations> {
     );
   }
 
-  void _delete(String idBilik) async {
+  void _delete(String idPs) async {
     final response = await http.post(
       Uri.parse(BaseUrl.deletePlaystations),
       body: {
-        "id_bilik": idBilik,
+        "id_ps": idPs,
       },
     );
 
@@ -141,10 +143,11 @@ class _PlaystationsState extends State<Playstations> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddPlaystations(_lihatData)),
+            MaterialPageRoute(
+                builder: (context) => AddPlaystations(_lihatData)),
           );
         },
-        child: Icon(Icons.add), // Ganti ikon dengan icon tambahan ('+')
+        child: Icon(Icons.add),
       ),
       body: loading
           ? Center(child: CircularProgressIndicator())
@@ -157,41 +160,63 @@ class _PlaystationsState extends State<Playstations> {
             final x = list[i];
             return Container(
               padding: EdgeInsets.all(10.0),
-              key: Key(x.idBilik.toString()),
+              key: Key(x.idPs.toString()),
+              height: 150.0, // Atur tinggi Container
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Image.network(
-                    'http://192.168.150.48/ps/upload/'+x.gambar,
-                    width: 100.0, height: 100.0,
-                  fit: BoxFit.cover,),
-                  SizedBox(
-                    width: 15.0,
+                  Container(
+                    width: 100.0,
+                    height: 100.0,
+                    child: Image.network(
+                      'http://192.168.150.48/ps/upload/' + x.gambar,
+                      fit: BoxFit.cover,
+                    ),
                   ),
+                  SizedBox(width: 15.0),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(x.jenisPs, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-                        Text(x.daftarGame),
-                        Text(money.format(int.parse(x.harga))),
-                        Text(x.nama),
+                        Text(
+                          'Bilik ${x.bilik}',
+                          style: TextStyle(
+                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 5.0),
+                        Text(x.jenisPs),
+                        SizedBox(height: 5.0),
+                        Text(
+                          x.daftarGame.length > 20
+                              ? x.daftarGame.substring(0, 20) + "..."
+                              : x.daftarGame,
+                        ),
+                        SizedBox(height: 5.0),
+                        Text('Rp. ${money.format(int.parse(x.harga))}'),
+                        SizedBox(height: 5.0),
+                        Text('Admin : ${x.nama}'),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context)=>EditPlaystations(x, _lihatData)
-                      ));
-                    },
-                    icon: Icon(Icons.edit),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      dialogDelete(x.idBilik);
-                    },
-                    icon: Icon(Icons.delete),
+                  SizedBox(width: 15.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  EditPlaystations(x, _lihatData)));
+                        },
+                        icon: Icon(Icons.edit),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          dialogDelete(x.idPs);
+                        },
+                        icon: Icon(Icons.delete),
+                      ),
+                    ],
                   ),
                 ],
               ),

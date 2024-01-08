@@ -20,7 +20,7 @@ class EditPlaystations extends StatefulWidget {
 
 class _EditPlaystationsState extends State<EditPlaystations> {
   final _key = GlobalKey<FormState>();
-  String jenisPs = '', daftarGame = '', harga = '', idUser = '', id_bilik = '';
+  String bilik = '', jenisPs = '', daftarGame = '', harga = '', idUser = '', id_ps = '';
   File? _imageFile;
 
   _pilihGallery() async {
@@ -36,6 +36,7 @@ class _EditPlaystationsState extends State<EditPlaystations> {
     }
   }
 
+  TextEditingController txtBilik = TextEditingController();
   TextEditingController txtJenis = TextEditingController();
   TextEditingController txtGame = TextEditingController();
   TextEditingController txtHarga = TextEditingController();
@@ -50,8 +51,9 @@ class _EditPlaystationsState extends State<EditPlaystations> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       idUser = preferences.getString("id") ?? '';
-      id_bilik = preferences.getString("id_bilik") ?? '';
+      id_ps = preferences.getString("id_ps") ?? '';
     });
+    txtBilik.text = widget.model.bilik ?? '';
     txtJenis.text = widget.model.jenisPs ?? '';
     txtGame.text = widget.model.daftarGame ?? '';
     txtHarga.text = widget.model.harga ?? '';
@@ -70,10 +72,11 @@ class _EditPlaystationsState extends State<EditPlaystations> {
       var uri = Uri.parse(BaseUrl.editPlaystations);
       var request = http.MultipartRequest("POST", uri);
 
+      request.fields['bilik'] = bilik;
       request.fields['jenis_ps'] = jenisPs;
       request.fields['daftar_game'] = daftarGame;
       request.fields['harga'] = harga.replaceAll(",", "");
-      request.fields['id_bilik'] = widget.model.idBilik;
+      request.fields['id_ps'] = widget.model.idPs;
 
       if (_imageFile != null) {
         var stream = http.ByteStream(DelegatingStream.typed(_imageFile!.openRead()));
@@ -142,6 +145,11 @@ class _EditPlaystationsState extends State<EditPlaystations> {
             ),
             TextFormField(
               enabled: false,
+              controller: txtBilik,
+              onSaved: (e) => bilik = e ?? '',
+              decoration: InputDecoration(labelText: 'Bilik'),
+            ),
+            TextFormField(
               controller: txtJenis,
               onSaved: (e) => jenisPs = e ?? '',
               decoration: InputDecoration(labelText: 'Jenis PS'),

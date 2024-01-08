@@ -1,5 +1,6 @@
 class psModel{
-  final String idBilik;
+  final String idPs;
+  final String bilik;
   final String jenisPs;
   final String daftarGame;
   final String harga;
@@ -8,6 +9,6 @@ class psModel{
   final String gambar;
 
 
-  psModel(this.idBilik, this.jenisPs, this.daftarGame, this.harga, this.idUsers, this.nama, this.gambar);
+  psModel(this.idPs, this.bilik, this.jenisPs, this.daftarGame, this.harga, this.idUsers, this.nama, this.gambar);
 
 }
