@@ -78,8 +78,16 @@ class _LoginState extends State<Login> {
     String namaAPI = data['nama'] ?? '';
     String id = data['id'] ?? '';
 
+
+    dynamic level = data['level'];
+
     if (value == 1) {
-      savePref(value ?? 0, usernameAPI, namaAPI, id);
+      // Check if level is a String, convert it to int if needed
+      if (level is String) {
+        level = int.tryParse(level);
+      }
+
+      savePref(value ?? 0, usernameAPI, namaAPI, id, level ?? 0);
       showSuccessMessage("Login Berhasil");
     } else {
       print("Login failed: $pesan");
@@ -87,18 +95,20 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void savePref(int value, String nama, String username, String id) async {
+  void savePref(int value, String nama, String username, String id, int level) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("value", value);
     preferences.setString("nama", nama);
     preferences.setString("username", username);
     preferences.setString("id", id);
+    preferences.setInt("level", level);
 
     setState(() {
       _loginStatus = LoginStatus.signIn;
       this.nama = nama;
     });
   }
+
 
   void signOut() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -137,18 +147,28 @@ class _LoginState extends State<Login> {
       if (value == 1) {
         username = preferences.getString("username") ?? '';
         nama = preferences.getString("nama") ?? '';
+        int? level = preferences.getInt("level");
         _loginStatus = LoginStatus.signIn;
+
+        if (level == 1) {
+          // Admin Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Dashboard(signOut: signOut)),
+          );
+        } else {
+          // User Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Dashboard(signOut: signOut)),
+          );
+        }
       } else {
         _loginStatus = LoginStatus.notSignIn;
       }
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getPref();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +193,13 @@ class _LoginState extends State<Login> {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
+              // Tambahkan gambar di sini
+              Image.asset(
+                'assets/ps_logo.png',  // Ganti dengan path sesuai dengan struktur proyek Anda
+                width: 100.0,
+                height: 100.0,
+              ),
+              SizedBox(height: 16.0),
               TextFormField(
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -195,12 +222,12 @@ class _LoginState extends State<Login> {
                 },
                 onSaved: (value) => password = value ?? '',
                 decoration: InputDecoration(
-                    labelText: "Password",
-                    suffixIcon: IconButton(
-                      onPressed: showHide,
-                      icon: Icon(
-                          _secureText ? Icons.visibility_off : Icons.visibility),
-                    )
+                  labelText: "Password",
+                  suffixIcon: IconButton(
+                    onPressed: showHide,
+                    icon: Icon(
+                        _secureText ? Icons.visibility_off : Icons.visibility),
+                  ),
                 ),
               ),
               SizedBox(height: 16.0),
@@ -213,9 +240,13 @@ class _LoginState extends State<Login> {
               InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Register()));
+                    MaterialPageRoute(builder: (context) => Register()),
+                  );
                 },
-                child: Text("Daftar Akun", textAlign: TextAlign.center,),
+                child: Text(
+                  "Daftar Akun",
+                  textAlign: TextAlign.center,
+                ),
               )
             ],
           ),

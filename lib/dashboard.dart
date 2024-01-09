@@ -25,6 +25,15 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
     setState(() {
       username = preferences.getString("username") ?? "";
       nama = preferences.getString("nama") ?? "";
+      int? level = preferences.getInt("level");
+
+      if (level == 0) {
+        // Jika level = 0, hanya tampilkan Home dan Profile
+        tabController = TabController(length: 2, vsync: this);
+      } else {
+        // Jika level != 0, tampilkan semua Tab
+        tabController = TabController(length: 4, vsync: this);
+      }
     });
   }
 
@@ -32,7 +41,6 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     getPref();
-    tabController = TabController(length: 4, vsync: this);
   }
 
   void _signOut() {
@@ -60,8 +68,10 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
           controller: tabController,
           children: <Widget>[
             Home(),
-            Playstations(),
-            User(),
+            if (tabController.length == 4) // Hanya tampilkan jika level != 0
+              Playstations(),
+            if (tabController.length == 4) // Hanya tampilkan jika level != 0
+              User(),
             Profile()
           ],
         ),
@@ -69,9 +79,9 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                  style: BorderStyle.none
-              )
+            borderSide: BorderSide(
+              style: BorderStyle.none,
+            ),
           ),
           controller: tabController,
           tabs: <Widget>[
@@ -79,14 +89,16 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
               icon: Icon(Icons.home),
               text: "Home",
             ),
-            Tab(
-              icon: Icon(Icons.gamepad),
-              text: "Playstations",
-            ),
-            Tab(
-              icon: Icon(Icons.group),
-              text: "User",
-            ),
+            if (tabController.length == 4) // Hanya tampilkan jika level != 0
+              Tab(
+                icon: Icon(Icons.gamepad),
+                text: "Playstations",
+              ),
+            if (tabController.length == 4) // Hanya tampilkan jika level != 0
+              Tab(
+                icon: Icon(Icons.group),
+                text: "User",
+              ),
             Tab(
               icon: Icon(Icons.account_circle),
               text: "Profile",
